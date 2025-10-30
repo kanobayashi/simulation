@@ -3,12 +3,13 @@
 #include <time.h> 
 #include "model.h"
 
-#define NUM_AGENTS 500
+#define NUM_AGENTS 10
 #define WIDTH 38.0
 #define HEIGHT 25.0
-#define SIMULATION_STEPS 10000
+#define SIMULATION_STEPS 1000
 
 int main() {
+    printf("NUM_AGENTS = %d\n", NUM_AGENTS);
     HumanSimulationModel model;
     init_model(&model, NUM_AGENTS, WIDTH, HEIGHT);
 

@@ -1,5 +1,5 @@
 // agent.c
-// desired_force,social_force,wall_force と　update_agent
+// desire_force,social_force,wall_force と　update_agent
 #include "agent.h"
 #include <math.h>
 #include <string.h>
@@ -22,7 +22,7 @@ void init_agent(HumanAgent *agent, int id, double x, double y, double tx, double
     agent->B = 0.08; //m
     agent->k = 1.2; //N/m
 }
-
+#include <float.h> // for DBL_MAX if needed
 void calculate_desired_force(HumanAgent *agent, double force[2]) {
     double dx = agent->target_pos[0] - agent->pos[0];
     double dy = agent->target_pos[1] - agent->pos[1];
@@ -43,6 +43,120 @@ void calculate_desired_force(HumanAgent *agent, double force[2]) {
     force[0] = (desired_vx - agent->velocity[0]) * agent->mass / agent->relaxation_time;
     force[1] = (desired_vy - agent->velocity[1]) * agent->mass / agent->relaxation_time;
 }
+// --- calculate_social_force の修正版 ---
+void calculate_social_force(HumanAgent *self, HumanAgent *other, double force[2]) {
+    double r_ab = self->radius + other->radius;
+    double vec_ab[2] = {
+        self->pos[0] - other->pos[0],
+        self->pos[1] - other->pos[1]
+    };
+    double d_ab = sqrt(vec_ab[0]*vec_ab[0] + vec_ab[1]*vec_ab[1]);
+
+    if (d_ab <= 1e-8) { // 同一座標ならランダムな微小ベクトルで回避
+        force[0] = 0.0;
+        force[1] = 0.0;
+        return;
+    }
+
+    double n_ab[2] = { vec_ab[0] / d_ab, vec_ab[1] / d_ab };
+
+    // exponent をクリップしてオーバーフロー防止
+    double exponent_arg = (r_ab - d_ab) / self->B;
+    if (exponent_arg > 20.0) exponent_arg = 20.0;   // exp(20) は ~4.8e8。必要に応じて調整
+    if (exponent_arg < -20.0) exponent_arg = -20.0;
+
+    double magnitude = self->A * exp(exponent_arg);
+
+    // 接触（重なり）に対する剛体反発（線形）を追加
+    double overlap = fmax(0.0, r_ab - d_ab);
+    double body_force_mag = self->k * overlap; // k は接触剛性
+
+    force[0] = magnitude * n_ab[0] + body_force_mag * n_ab[0];
+    force[1] = magnitude * n_ab[1] + body_force_mag * n_ab[1];
+}
+
+// --- calculate_wall_force の修正版 ---
+void calculate_wall_force(HumanAgent *agent, double force[2]) {
+    // 距離は「どれだけはみ出してるか」または「半径との差」
+    double distance_to_wall = fmax(0.0, agent->radius - agent->pos[1]);
+    if (distance_to_wall <= 0.0) {
+        force[0] = 0.0;
+        force[1] = 0.0;
+        return;
+    }
+
+    // exponent をクリップ
+    double exponent_arg = distance_to_wall / agent->B;
+    if (exponent_arg > 20.0) exponent_arg = 20.0;
+
+    double repulsive = agent->k * exp(exponent_arg); // もしくは agent->A * exp(exponent_arg) にする
+    // さらに接触に対する線形反発を加える（オーバーラップがある場合）
+    double contact = agent->k * distance_to_wall;
+
+    force[0] = 0.0;
+    force[1] = repulsive + contact;
+}
+
+// --- update_agent の修正版（速度上限の追加など） ---
+void update_agent(HumanAgent *agent, HumanAgent *agents, int num_agents,double dt) {
+    double total_force[2] = {0.0, 0.0};
+
+    double desire_force[2];
+    calculate_desired_force(agent, desire_force);
+    total_force[0] += desire_force[0];
+    total_force[1] += desire_force[1];
+
+    for (int i = 0; i < num_agents; i++) {
+        if (agents[i].id != agent->id) {
+            double social_force[2];
+            calculate_social_force(agent, &agents[i], social_force);
+            total_force[0] += social_force[0];
+            total_force[1] += social_force[1];
+        }
+    }
+
+    double wall_force[2];
+    calculate_wall_force(agent, wall_force);
+    total_force[0] += wall_force[0];
+    total_force[1] += wall_force[1];
+
+    // 加速度を計算（上限を設ける）
+    double acceleration[2] = {
+        total_force[0] / agent->mass,
+        total_force[1] / agent->mass
+    };
+
+    // 加速度クリップ（例: vmax_acc = 50 m/s^2）
+    double max_acc = 50.0;
+    double acc_mag = sqrt(acceleration[0]*acceleration[0] + acceleration[1]*acceleration[1]);
+    if (acc_mag > max_acc) {
+        acceleration[0] = acceleration[0] / acc_mag * max_acc;
+        acceleration[1] = acceleration[1] / acc_mag * max_acc;
+    }
+
+    // 速度更新
+    agent->velocity[0] += acceleration[0] * dt;
+    agent->velocity[1] += acceleration[1] * dt;
+
+    // 速度上限（例: 5 m/s）
+    double max_v = 5.0;
+    double vmag = sqrt(agent->velocity[0]*agent->velocity[0] + agent->velocity[1]*agent->velocity[1]);
+    if (vmag > max_v) {
+        agent->velocity[0] = agent->velocity[0] / vmag * max_v;
+        agent->velocity[1] = agent->velocity[1] / vmag * max_v;
+    }
+
+    // 位置更新
+    agent->pos[0] += agent->velocity[0] * dt;
+    agent->pos[1] += agent->velocity[1] * dt;
+
+    // Y 範囲外抑制（床より下に行かないようにする）
+    if (agent->pos[1] < 0.0) agent->pos[1] = 0.0;
+}
+
+
+/*
+
 void calculate_social_force(HumanAgent *self, HumanAgent *other, double force[2]) {
     double r_ab = self->radius + other->radius;
     double vec_ab[2] = {
@@ -119,3 +233,4 @@ void update_agent(HumanAgent *agent, HumanAgent *agents, int num_agents,double d
     agent->pos[1] += agent->velocity[1] * dt;
 
 }
+*/

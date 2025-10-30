@@ -5,6 +5,7 @@ import matplotlib.patches as patches
 import matplotlib.lines as lines
 import numpy as np # 線分の中点を計算するために追加
 
+plt.rcParams["font.family"] = "Meiryo" 
 # CSVファイルの読み込み
 df = pd.read_csv("positions.csv")
 
@@ -29,6 +30,9 @@ ax.set_ylim(0, max_y)
 ax.set_xlabel("X座標")
 ax.set_ylabel("Y座標")
 ax.set_title("人流シミュレーション")
+
+print("max_y=", max_y)
+ax.set_ylim(0, max_y)
 
 # ====================================================================
 # --- 障害物描画の定義 ---
@@ -68,12 +72,6 @@ for obs in obstacles:
 # 障害物描画部分のコードはアニメーションループの外で一度実行すればOKです。
 # ====================================================================
 
-# アニメーション更新関数 (変更なし)
-#def update(frame):
-   # data = grouped.get_group(frame)
-    #scat.set_offsets(data[["x", "y"]].values)
-   # ax.set_title(f"人流シミュレーション - ステップ {frame}")
-    #return scat,
 
 def update(frame):
     if frame in grouped.groups:
@@ -84,13 +82,6 @@ def update(frame):
 
 # アニメーション作成
 ani = FuncAnimation(fig, update, frames=range(max_step + 1), interval=200, blit=True)
-
-#ani.save("simulation.mp4", writer="ffmpeg")
-#print("simulation.mp4 に保存しました。")
-
-
-# アニメーション作成
-#ani = FuncAnimation(fig, update, frames=sorted(df["step"].unique()), interval=200, blit=True) # intervalを200msに変更
 
 # 表示
 plt.show()
