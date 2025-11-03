@@ -266,12 +266,17 @@ for obs in obstacles:
     ax.add_patch(circle)
 
 
-# --- アニメーション関数 ---
+# --- アニメーション関数 軌跡を見たいときはこっち ---
+# def animate(i):
+#     scat.set_offsets(history[i])
+#     for j, line in enumerate(lines):
+#         line.set_data(history[:i+1,j,0], history[:i+1,j,1])  # 軌跡
+#     return scat, *lines
+
+# --- エージェントの動きだけでいいときはこっち ---
 def animate(i):
     scat.set_offsets(history[i])
-    for j, line in enumerate(lines):
-        line.set_data(history[:i+1,j,0], history[:i+1,j,1])  # 軌跡
-    return scat, *lines
+    return scat,  
 
 ani = FuncAnimation(fig, animate, frames=len(steps), interval=100, blit=True)
 
