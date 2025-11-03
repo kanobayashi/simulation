@@ -58,7 +58,7 @@ void step_model(HumanSimulationModel* model) {
             double dy = agent->pos[1] - model->exits[e].pos[1];
             double dist = sqrt(dx * dx + dy * dy);
 
-            if (dist < model->exits[e].width / 2.0) {
+            if (dist < model->exits[e].width / 2.0 + agent->radius) {
                 remove_agent(model, agent->id);  // エージェントを退場させる
                 break;  // 一度退場したら他の出口はチェック不要
             }

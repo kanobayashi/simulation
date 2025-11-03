@@ -288,5 +288,35 @@ writer = FFMpegWriter(fps=20, bitrate=1800)
 ani.save("simulation.mp4", writer=writer)
 print("✅ 動画をanimation.mp4 として保存したよ～～～")
 
+
+# --- グラフ作成 ---
+agent_counts = df.groupby('step')['id'].nunique().reset_index()
+agent_counts.columns = ['step', 'num_agents']
+
+initial_agents = agent_counts['num_agents'].iloc[0]     
+final_step = agent_counts.loc[agent_counts['num_agents'] == 0, 'step']
+evacuation_done_step = int(final_step.iloc[0]) if not final_step.empty else None
+
+
+plt.figure(figsize=(8, 4))
+plt.plot(agent_counts['step'], agent_counts['num_agents'], color='blue', lw=2)
+plt.xlabel("Step")
+plt.ylabel("Number of Agents")
+plt.title("Number of Agents Over Time")
+plt.grid(True)
+plt.tight_layout()
+
+info_text = f"Initial agents: {initial_agents}"
+if evacuation_done_step is not None:
+    info_text += f"\nAll evacuated at step: {evacuation_done_step}"
+else:
+    info_text += "\nAll agents not yet evacuated"
+
+plt.text(0.7, 0.85, info_text, transform=plt.gca().transAxes,
+         fontsize=10, bbox=dict(facecolor='white', alpha=0.7, edgecolor='gray'))
+
+plt.savefig("agent_count_over_time.png", dpi=300) 
+print("避難時間の折れ線グラフまで出力できたよ")
+
 plt.show()
 
