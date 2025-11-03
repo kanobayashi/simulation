@@ -1,9 +1,7 @@
 #ifndef OBSTACLE_H
 #define OBSTACLE_H
-//#include "agent.h"  // HumanAgent を使うために必要
 
-
-typedef struct HumanAgent HumanAgent;
+struct HumanAgent; // 前方宣言でOK（型だけ必要）
 
 typedef enum {
     OBSTACLE_CIRCLE,
@@ -21,9 +19,9 @@ typedef struct {
     double p2[2];
     double thickness;
 } Obstacle;
-
-#include "agent.h"  // HumanAgent を使うために必要
-
-void calculate_obstacle_force(HumanAgent *agent, Obstacle *obstacles, int num_obstacles, double force[2]);
+void calculate_obstacle_force(struct HumanAgent *agent,
+                              Obstacle *obstacles,
+                              int num_obstacles,
+                              double force[2]);
 
 #endif

@@ -1,5 +1,6 @@
-#include "agent.h"      // HumanAgent の中身を使うために先に読み込む
+// obstacle.c
 #include "obstacle.h"
+#include "agent.h" 
 #include <math.h>
 
 static void calc_circle_force(HumanAgent *agent, Obstacle *obs, double force[2]) {

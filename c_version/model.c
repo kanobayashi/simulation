@@ -1,17 +1,21 @@
-#include "model.h"
-#include "obstacle.h"  // calculate_obstacle_force を使うため
-#include "exit.h"
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
 #include <math.h>
-#include <stdlib.h>
+
+#include "main.h"
+#include "model.h"
+#include "agent.h"
+#include "obstacle.h"
+#include "exit.h"
+
+
 
 void init_model(HumanSimulationModel* model, int num_agents, double width, double height) {
     model->num_agents = num_agents;
     model->width = width;
     model->height = height;
-    model->time_step = 0.1;
+    model->time_step = 0.01;
     model->running = 1;
     model->num_exits = 1;
     model->exits = (Exit*)malloc(sizeof(Exit) * model->num_exits);
@@ -29,16 +33,14 @@ void init_model(HumanSimulationModel* model, int num_agents, double width, doubl
     model->obstacles[1] = (Obstacle){OBSTACLE_RECTANGLE, {20.0, 1.0}, 0.0, 2.0, 1.0, {0.0,0.0}, {0.0,0.0}, 0.0};
     model->obstacles[2] = (Obstacle){OBSTACLE_SEGMENT, {0.0,0.0}, 0.0, 0.0, 0.0, {5.0,0.0}, {5.0,3.0}, 0.2};
 
-    // 乱数初期化
-    srand((unsigned int)time(NULL));
-
     // エージェント初期化
     for (int i = 0; i < num_agents; i++) {
-        double x = ((double)rand()/RAND_MAX) * width;
-        double y = ((double)rand()/RAND_MAX) * height;
+        double x = ((double)rand()/(double)RAND_MAX) * width;
+        double y = ((double)rand()/(double)RAND_MAX) * height;
         double tx = model->exits[0].pos[0]; 
         double ty = model->exits[0].pos[1];
-        init_agent(&model->agents[i], i, x, y, tx, ty);
+        init_agent(&model->agents[i], i, x, y, tx, ty, model);
+        printf("Agent %d: x = %.2f, y = %.2f\n", i, x, y);  // 確認用
     }
 }
 
@@ -50,7 +52,7 @@ void step_model(HumanSimulationModel* model) {
         update_agent(agent,
                      model->agents,
                      model->num_agents,
-                     model->time_step);
+                     model->time_step ,model);
 
         // 出口到達判定
         for (int e = 0; e < model->num_exits; e++) {

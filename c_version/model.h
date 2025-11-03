@@ -1,11 +1,12 @@
 #ifndef MODEL_H
 #define MODEL_H
 
+#include "main.h"
 #include "agent.h"
 #include "obstacle.h"
 #include "exit.h"
 
-typedef struct {
+typedef struct HumanSimulationModel{
     int num_agents; //シミュレーションに参加しているエージェントの総数。
     HumanAgent* agents; //すべてのエージェントのデータを格納する配列へのポインタ。
     int num_obstacles; //シミュレーション空間内の障害物の総数。
@@ -19,9 +20,10 @@ typedef struct {
 
 } HumanSimulationModel;
 
-void init_model(HumanSimulationModel* model, int num_agents, double width, double height); //シミュレーション全体を初期化
-void step_model(HumanSimulationModel* model); //シミュレーションを1ステップ進めます
-void remove_agent(HumanSimulationModel* model, int agent_id); //指定されたIDのエージェントをシミュレーションから削除
-void free_model(HumanSimulationModel* model);//シミュレーションで使用したすべての動的メモリを解放
+// model.h
+void init_model(HumanSimulationModel* model, int num_agents, double width, double height);
+void step_model(HumanSimulationModel* model);
+void remove_agent(HumanSimulationModel* model, int agent_id);
+void free_model(HumanSimulationModel* model);
 
 #endif

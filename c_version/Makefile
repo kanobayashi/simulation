@@ -6,7 +6,7 @@ CFLAGS = -Wall -lm
 TARGET = sim
 
 # ソースファイル
-SRCS = main.c agent.c
+SRCS = main.c agent.c model.c obstacle.c
 
 # ビルドルール
 all: $(TARGET)
