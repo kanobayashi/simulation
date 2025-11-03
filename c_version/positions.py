@@ -220,6 +220,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
+from matplotlib.animation import FuncAnimation, PillowWriter, FFMpegWriter
 
 WIDTH, HEIGHT = 38, 25
 
@@ -228,14 +229,25 @@ df = pd.read_csv("positions.csv")  # step,id,x,y
 
 # --- ユニークな値を取得 ---
 steps = sorted(df['step'].unique())
+steps = steps[::100]
 agent_ids = sorted(df['id'].unique())
 
 # --- アニメーション用にデータ整形 ---
 history = []
 for step in steps:
-    pos_step = df[df['step'] == step].sort_values('id')[['x','y']].values
+    pos_step = np.full((len(agent_ids), 2), np.nan)
+    df_step = df[df['step'] == step]
+    for idx, agent_id in enumerate(agent_ids):
+        agent_row = df_step[df_step['id']==agent_id]
+        if not agent_row.empty:
+            pos_step[idx] = agent_row[['x','y']].values[0]
     history.append(pos_step)
 history = np.array(history)  # shape: (steps, num_agents, 2)
+
+obstacles = [
+    {"pos": (18.2, 0.8), "radius": 0.4},
+    {"pos": (19.8, 0.8), "radius": 0.4}
+]
 
 # --- 描画準備 ---
 fig, ax = plt.subplots()
@@ -247,8 +259,12 @@ ax.set_xlabel("X")
 ax.set_ylabel("Y")
 ax.set_title("Agent Movement Over Time")
 ax.set_aspect('equal')  
-# # # 1単位を正方形に、全体は横長
-# ax.set_aspect(aspect=HEIGHT/WIDTH)
+
+# 障害物を描画
+for obs in obstacles:
+    circle = plt.Circle(obs["pos"], obs["radius"], color='red', alpha=0.5)
+    ax.add_patch(circle)
+
 
 # --- アニメーション関数 ---
 def animate(i):
@@ -258,4 +274,14 @@ def animate(i):
     return scat, *lines
 
 ani = FuncAnimation(fig, animate, frames=len(steps), interval=100, blit=True)
+
+ani.save("simulation.gif", writer=PillowWriter(fps=20))
+print("✅ GIFを simulation.gif として保存しました！")
+
+# ====== MP4として保存 ======
+writer = FFMpegWriter(fps=20, bitrate=1800)
+ani.save("simulation.mp4", writer=writer)
+print("✅ 動画をanimation.mp4 として保存したよ～～～")
+
 plt.show()
+

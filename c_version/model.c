@@ -26,12 +26,10 @@ void init_model(HumanSimulationModel* model, int num_agents, double width, doubl
     model->agents = (HumanAgent*)malloc(sizeof(HumanAgent) * num_agents);
 
 // --- 障害物設定部分を以下のように書き換える ---
-    model->num_obstacles = 3;
+    model->num_obstacles = 2;
     model->obstacles = (Obstacle*)malloc(sizeof(Obstacle) * model->num_obstacles);
-
-    model->obstacles[0] = (Obstacle){OBSTACLE_CIRCLE, {10.0, 0.5}, 0.3, 0.0, 0.0, {0.0,0.0}, {0.0,0.0}, 0.0};
-    model->obstacles[1] = (Obstacle){OBSTACLE_RECTANGLE, {20.0, 1.0}, 0.0, 2.0, 1.0, {0.0,0.0}, {0.0,0.0}, 0.0};
-    model->obstacles[2] = (Obstacle){OBSTACLE_SEGMENT, {0.0,0.0}, 0.0, 0.0, 0.0, {5.0,0.0}, {5.0,3.0}, 0.2};
+    model->obstacles[0] = (Obstacle){OBSTACLE_CIRCLE, {18.2, 0.8}, 0.4, 0.0, 0.0, {0.0,0.0}, {0.0,0.0}, 0.0};
+    model->obstacles[1] = (Obstacle){OBSTACLE_CIRCLE, {19.8, 0.8}, 0.4, 0.0, 0.0, {0.0,0.0}, {0.0,0.0}, 0.0};
 
     // エージェント初期化
     for (int i = 0; i < num_agents; i++) {
