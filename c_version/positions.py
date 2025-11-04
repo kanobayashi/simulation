@@ -244,9 +244,16 @@ for step in steps:
     history.append(pos_step)
 history = np.array(history)  # shape: (steps, num_agents, 2)
 
+#CIRCLE
+# obstacles = [
+#     {"pos": (18.2, 0.8), "radius": 0.4},
+#     {"pos": (19.8, 0.8), "radius": 0.4}
+# ]
+
+#RECTANGLE
 obstacles = [
-    {"pos": (18.2, 0.8), "radius": 0.4},
-    {"pos": (19.8, 0.8), "radius": 0.4}
+    {"type": "OBSTACLE_RECTANGLE","pos": (18.2, 0.8), "width": 0.8, "height": 0.8},
+    {"type": "OBSTACLE_RECTANGLE","pos": (19.8, 0.8), "width": 0.8, "height": 0.8}
 ]
 
 # --- 描画準備 ---
@@ -262,8 +269,15 @@ ax.set_aspect('equal')
 
 # 障害物を描画
 for obs in obstacles:
-    circle = plt.Circle(obs["pos"], obs["radius"], color='red', alpha=0.5)
-    ax.add_patch(circle)
+    if obs["type"] == "OBSTACLE_RECTANGLE":
+        x = obs["pos"][0] - obs["width"] / 2
+        y = obs["pos"][1] - obs["height"] / 2
+        rect = plt.Rectangle((x, y), obs["width"], obs["height"], color='red', alpha=0.5)
+        ax.add_patch(rect)
+    elif obs["type"] == "OBSTACLE_CIRCLE":
+        circle = plt.Circle(obs["pos"], obs["radius"], color='red', alpha=0.5)
+        ax.add_patch(circle)
+
 
 
 # --- アニメーション関数 軌跡を見たいときはこっち ---
@@ -278,13 +292,13 @@ def animate(i):
     scat.set_offsets(history[i])
     return scat,  
 
-ani = FuncAnimation(fig, animate, frames=len(steps), interval=100, blit=True)
+ani = FuncAnimation(fig, animate, frames=len(steps), interval=500, blit=True)
 
 ani.save("simulation.gif", writer=PillowWriter(fps=20))
 print("✅ GIFを simulation.gif として保存しました！")
 
 # ====== MP4として保存 ======
-writer = FFMpegWriter(fps=20, bitrate=1800)
+writer = FFMpegWriter(fps=1, bitrate=1800)
 ani.save("simulation.mp4", writer=writer)
 print("✅ 動画をanimation.mp4 として保存したよ～～～")
 

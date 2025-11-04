@@ -31,6 +31,29 @@ void init_model(HumanSimulationModel* model, int num_agents, double width, doubl
     model->obstacles[0] = (Obstacle){OBSTACLE_CIRCLE, {18.2, 0.8}, 0.4, 0.0, 0.0, {0.0,0.0}, {0.0,0.0}, 0.0};
     model->obstacles[1] = (Obstacle){OBSTACLE_CIRCLE, {19.8, 0.8}, 0.4, 0.0, 0.0, {0.0,0.0}, {0.0,0.0}, 0.0};
 
+    
+    // model->obstacles[0] = (Obstacle){
+    //     OBSTACLE_RECTANGLE,  // ← 四角形
+    //     {18.2, 0.8},         // 位置そのまま
+    //     0.0,                 // radius（使わないから0）
+    //     0.8,                 // width
+    //     0.8,                 // height
+    //     {0.0, 0.0},          // p1（使わない）
+    //     {0.0, 0.0},          // p2（使わない）
+    //     0.0                  // thickness（使わない）
+    // };
+
+    // model->obstacles[1] = (Obstacle){
+    //     OBSTACLE_RECTANGLE,
+    //     {19.8, 0.8},
+    //     0.0,
+    //     0.8,
+    //     0.8,
+    //     {0.0, 0.0},
+    //     {0.0, 0.0},
+    //     0.0
+    // };
+
     // エージェント初期化
     for (int i = 0; i < num_agents; i++) {
         double x = ((double)rand()/(double)RAND_MAX) * width;
