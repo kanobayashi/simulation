@@ -25,5 +25,7 @@ void init_model(HumanSimulationModel* model, int num_agents, double width, doubl
 void step_model(HumanSimulationModel* model);
 void remove_agent(HumanSimulationModel* model, int agent_id);
 void free_model(HumanSimulationModel* model);
+int run_simulation(HumanSimulationModel *model);
+int check_evacuation_complete(HumanSimulationModel *model);
 
 #endif

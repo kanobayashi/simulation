@@ -332,5 +332,18 @@ plt.text(0.7, 0.85, info_text, transform=plt.gca().transAxes,
 plt.savefig("agent_count_over_time.png", dpi=300) 
 print("避難時間の折れ線グラフまで出力できたよ")
 
-plt.show()
 
+df = pd.read_csv("results.csv")
+
+# --- 折れ線グラフ描画 ---
+plt.figure(figsize=(8,5))
+plt.plot(df["y_position"], df["avg_steps"], marker="o", color="blue", lw=2)
+plt.xlabel("Obstacle Y-coordinate")
+plt.ylabel("Average evacuation time (steps)")
+plt.title("Relationship between obstacle Y-coordinate and average evacuation time")
+plt.grid(True)
+plt.tight_layout()
+
+# --- 保存と表示 ---
+plt.savefig("results_plot.png", dpi=300)
+plt.show()

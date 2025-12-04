@@ -17,42 +17,25 @@ void init_model(HumanSimulationModel* model, int num_agents, double width, doubl
     model->height = height;
     model->time_step = 0.01;
     model->running = 1;
+
+    //出口の設定
     model->num_exits = 1;
     model->exits = (Exit*)malloc(sizeof(Exit) * model->num_exits);
-    model->exits[0] = (Exit){ {width/2,0},1.6};
+    model->exits[0] = (Exit){ {width/2,0},1.6 , 0.8};
 
 
     // エージェント配列確保
     model->agents = (HumanAgent*)malloc(sizeof(HumanAgent) * num_agents);
 
-// --- 障害物設定部分を以下のように書き換える ---
+    //障害物の初期設定
     model->num_obstacles = 2;
     model->obstacles = (Obstacle*)malloc(sizeof(Obstacle) * model->num_obstacles);
+    //円柱
     model->obstacles[0] = (Obstacle){OBSTACLE_CIRCLE, {18.2, 0.8}, 0.4514, 0.0, 0.0, {0.0,0.0}, {0.0,0.0}, 0.0};
     model->obstacles[1] = (Obstacle){OBSTACLE_CIRCLE, {19.8, 0.8}, 0.4514, 0.0, 0.0, {0.0,0.0}, {0.0,0.0}, 0.0};
-
-    
-    // model->obstacles[0] = (Obstacle){
-    //     OBSTACLE_RECTANGLE,  // ← 四角形
-    //     {18.2, 0.8},         // 位置そのまま
-    //     0.0,                 // radius（使わないから0）
-    //     0.8,                 // width
-    //     0.8,                 // height
-    //     {0.0, 0.0},          // p1（使わない）
-    //     {0.0, 0.0},          // p2（使わない）
-    //     0.0                  // thickness（使わない）
-    // };
-
-    // model->obstacles[1] = (Obstacle){
-    //     OBSTACLE_RECTANGLE,
-    //     {19.8, 0.8},
-    //     0.0,
-    //     0.8,
-    //     0.8,
-    //     {0.0, 0.0},
-    //     {0.0, 0.0},
-    //     0.0
-    // };
+    //四角形
+    // model->obstacles[0] = (Obstacle){OBSTACLE_RECTANGLE,{18.2,0.8},0.0,0.8,0.8,{0.0,0.0},{0.0,0.0},0.0}; 
+    // model->obstacles[1] = (Obstacle){OBSTACLE_RECTANGLE,{19.8,0.8},0.0,0.8,0.8,{0.0,0.0},{0.0,0.0},0.0};
 
     // エージェント初期化
     for (int i = 0; i < num_agents; i++) {
@@ -66,26 +49,28 @@ void init_model(HumanSimulationModel* model, int num_agents, double width, doubl
 }
 
 void step_model(HumanSimulationModel* model) {
-    for (int i = 0; i < model->num_agents; i++) {
+    // 後ろからループすることで削除時のインデックスずれを防ぐ
+    for (int i = model->num_agents - 1; i >= 0; i--) {
         HumanAgent* agent = &model->agents[i];
 
         // エージェントの更新（移動・力計算）
         update_agent(agent,
                      model->agents,
                      model->num_agents,
-                     model->time_step ,model);
+                     model->time_step,
+                     model);
 
         // 出口到達判定
         for (int e = 0; e < model->num_exits; e++) {
-            double dx = agent->pos[0] - model->exits[e].pos[0];
-            double dy = agent->pos[1] - model->exits[e].pos[1];
-            double dist = sqrt(dx * dx + dy * dy);
-
-            if (dist < model->exits[e].width / 2.0 + agent->radius) {
-                remove_agent(model, agent->id);  // エージェントを退場させる
-                break;  // 一度退場したら他の出口はチェック不要
-            }
-        }
+            double dx = fabs(agent->pos[0] - model->exits[e].pos[0]);
+            double dy = fabs(agent->pos[1] - model->exits[e].pos[1]);
+            // 矩形の半幅・半高さにエージェント半径を加えて判定
+            if (dx < model->exits[e].width / 2.0 + agent->radius &&
+                dy < model->exits[e].height / 2.0 + agent->radius) {
+                    remove_agent(model, agent->id);  // エージェントを退場させる
+                    break;  // 一度退場したら他の出口はチェック不要
+    }
+}
     }
 }
 
@@ -98,6 +83,11 @@ void free_model(HumanSimulationModel* model) {
     if (model->obstacles != NULL) {
         free(model->obstacles);
         model->obstacles = NULL;
+    }
+
+        if (model->exits != NULL) {
+        free(model->exits);
+        model->exits = NULL;
     }
 }
 
@@ -119,4 +109,23 @@ void remove_agent(HumanSimulationModel* model, int agent_id) {
         }
         model->num_agents--;  // エージェント数を1減らす
     }
+}
+int check_evacuation_complete(HumanSimulationModel* model) {
+    return (model->num_agents == 0);
+}
+
+// 避難完了までシミュレーションを回してステップ数を返す
+int run_simulation(HumanSimulationModel* model) {
+    int steps = 0;
+
+    while (!check_evacuation_complete(model)) {
+        step_model(model);  // 1ステップ進める
+        steps++;
+
+        if (steps > SIMULATION_STEPS) { // 安全のため上限
+            break;
+        }
+    }
+
+    return steps;
 }

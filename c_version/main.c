@@ -25,12 +25,13 @@ int main() {
                model.agents[i].target_pos[1]);
     }
 
-    FILE *fp = fopen("positions.csv", "w");
-    if (!fp) {
-        perror("Failed to open file");
+    // --- 通常シミュレーションの出力 (positions.csv) ---
+    FILE *fp_pos = fopen("positions.csv", "w");
+    if (!fp_pos) {
+        perror("Failed to open positions.csv");
         return 1;
     }
-    fprintf(fp, "step,id,x,y\n");
+    fprintf(fp_pos, "step,id,x,y\n");
 
     for (int step = 0; step < SIMULATION_STEPS; step++) {
         step_model(&model);
@@ -47,7 +48,7 @@ int main() {
         }
 
         for (int i = 0; i < model.num_agents; i++) {
-            fprintf(fp, "%d,%d,%.2f,%.2f\n",
+            fprintf(fp_pos, "%d,%d,%.2f,%.2f\n",
                     step,
                     model.agents[i].id,
                     model.agents[i].pos[0],
@@ -55,13 +56,53 @@ int main() {
         }
     }
 
-    fclose(fp);
+    fclose(fp_pos);
     free_model(&model);
 
     printf("=== シミュレーション終了 ===\n");
     printf("positions.csv に出力しました\n");
 
+    // --- 障害物位置を変えた平均避難時間の出力 (results.csv) ---
+    int num_positions = 10;
+    double y_start = 0;
+    double y_step = 0.1;
+    double results[num_positions];
+
+    FILE *fp_res = fopen("./results.csv", "w");
+    if (!fp_res) {
+        perror("Failed to open results.csv");
+        return 1;
+    }
+    fprintf(fp_res, "y_position,avg_steps\n");
+
+    for (int i = 0; i < num_positions; i++) {
+        double y = y_start + i * y_step;
+        double sum = 0;
+
+        for (int trial = 0; trial < 50; trial++) {
+            init_model(&model, NUM_AGENTS, WIDTH, HEIGHT);
+
+            // 障害物位置を設定（y座標だけ変える）
+            model.obstacles[0] = (Obstacle){OBSTACLE_CIRCLE, {18.2, y}, 0.4514,
+                                            0.0, 0.0, {0.0,0.0}, {0.0,0.0}, 0.0};
+            model.obstacles[1] = (Obstacle){OBSTACLE_CIRCLE, {19.8, y}, 0.4514,
+                                            0.0, 0.0, {0.0,0.0}, {0.0,0.0}, 0.0};
+
+            int steps = run_simulation(&model);
+            sum += steps;
+
+            free_model(&model);
+        }
+
+        results[i] = sum / 50.0;
+        fprintf(fp_res, "%f,%f\n", y, results[i]);
+    }
+
+    fclose(fp_res);
+    printf("results.csv に保存しました\n");
+
     return 0;
 }
+
 // gcc main.c model.c agent.c obstacle.c -o sim.exe -lm
-//.\sim.exe
+// ./sim.exe
