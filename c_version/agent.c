@@ -14,15 +14,15 @@ void init_agent(HumanAgent *agent, int id, double x, double y, double tx, double
     agent->pos[1] = fmin(fmax(y, 0.0), model->height);
     agent->target_pos[0] = tx;
     agent->target_pos[1] = ty;
-    agent->radius = 0.25; //m
-    agent->mass = 80.0; //kg
-    agent->velocity[0] = 0.0; //初期速度　停止しているため0
+    agent->radius = 0.25; 
+    agent->mass = 80.0; 
+    agent->velocity[0] = 0.0; 
     agent->velocity[1] = 0.0; 
-    agent->desired_speed = 1.5; //m/s
-    agent->relaxation_time = 0.5;//s  
-    agent->A = 2000; //N
-    agent->B = 0.1; //m
-    agent->k = 1e5; //kg/m
+    agent->desired_speed = 1.5; 
+    agent->relaxation_time = 0.5;
+    agent->A = 2000; 
+    agent->B = 0.1;
+    agent->k = 1e5;
 }
 
 
@@ -56,7 +56,7 @@ void calculate_social_force(HumanAgent *self, HumanAgent *other, double force[2]
     };
     double d_ab = sqrt(vec_ab[0]*vec_ab[0] + vec_ab[1]*vec_ab[1]);
 
-    if (d_ab <= 1e-8) { // 同一座標ならランダムな微小ベクトルで回避
+    if (d_ab <= 1e-8) {
         force[0] = 0.0;
         force[1] = 0.0;
         return;
@@ -118,7 +118,7 @@ void update_agent(HumanAgent *agent, HumanAgent *agents, int num_agents, double 
     total_force[0] += desire_force[0];
     total_force[1] += desire_force[1];
 
-    // 社会的相互作用
+    // 他エージェントとの相互作用力
     for (int i = 0; i < num_agents; i++) {
         if (agents[i].id != agent->id) {
             double social_force[2];
@@ -128,11 +128,21 @@ void update_agent(HumanAgent *agent, HumanAgent *agents, int num_agents, double 
         }
     }
 
-    // 壁との力
+    // 壁からの力
     double wall_force[2];
     calculate_wall_force(agent, wall_force, model->width, model->height);
     total_force[0] += wall_force[0];
     total_force[1] += wall_force[1];
+
+    //障害物からの力
+    double obstacle_total_force[2];
+    calculate_obstacle_force(agent, 
+                             model->obstacles, 
+                             model->num_obstacles, 
+                             obstacle_total_force);
+                             
+    total_force[0] += obstacle_total_force[0];
+    total_force[1] += obstacle_total_force[1];
 
     // 力の上限
     double max_force = 1000.0;

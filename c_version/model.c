@@ -24,7 +24,7 @@ void init_model(HumanSimulationModel* model, int num_agents, double width, doubl
     model->exits[0] = (Exit){ {width/2,0},1.6 , 0.8};
 
 
-    // エージェント配列確保
+    // エージェント配列
     model->agents = (HumanAgent*)malloc(sizeof(HumanAgent) * num_agents);
 
     //障害物の初期設定
@@ -44,12 +44,11 @@ void init_model(HumanSimulationModel* model, int num_agents, double width, doubl
         double tx = model->exits[0].pos[0]; 
         double ty = model->exits[0].pos[1];
         init_agent(&model->agents[i], i, x, y, tx, ty, model);
-        printf("Agent %d: x = %.2f, y = %.2f\n", i, x, y);  // 確認用
+        // printf("Agent %d: x = %.2f, y = %.2f\n", i, x, y);  // 確認用
     }
 }
 
 void step_model(HumanSimulationModel* model) {
-    // 後ろからループすることで削除時のインデックスずれを防ぐ
     for (int i = model->num_agents - 1; i >= 0; i--) {
         HumanAgent* agent = &model->agents[i];
 
@@ -68,7 +67,7 @@ void step_model(HumanSimulationModel* model) {
             if (dx < model->exits[e].width / 2.0 + agent->radius &&
                 dy < model->exits[e].height / 2.0 + agent->radius) {
                     remove_agent(model, agent->id);  // エージェントを退場させる
-                    break;  // 一度退場したら他の出口はチェック不要
+                    break; 
     }
 }
     }
