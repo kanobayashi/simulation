@@ -22,7 +22,8 @@ void init_agent(HumanAgent *agent, int id, double x, double y, double tx, double
     agent->relaxation_time = 0.5;
     agent->A = 2000; 
     agent->B = 0.1;
-    agent->k = 1e5;
+    agent->k = 1.2e5;
+    agent->kappa = 2.4e5; // 2.4 * 10^5 kg m^-1 s^-1
 }
 
 
@@ -47,7 +48,7 @@ void calculate_desired_force(HumanAgent *agent, double force[2]) {
     force[1] = (desired_vy - agent->velocity[1]) * agent->mass / agent->relaxation_time;
 }
 
-// --- calculate_social_force の修正版 ---
+// --- calculate_social_force  ---
 void calculate_social_force(HumanAgent *self, HumanAgent *other, double force[2]) {
     double r_ab = self->radius + other->radius;
     double vec_ab[2] = {
@@ -56,12 +57,14 @@ void calculate_social_force(HumanAgent *self, HumanAgent *other, double force[2]
     };
     double d_ab = sqrt(vec_ab[0]*vec_ab[0] + vec_ab[1]*vec_ab[1]);
 
+    //距離が0の時に計算が崩壊するのを防ぐ
     if (d_ab <= 1e-8) {
         force[0] = 0.0;
         force[1] = 0.0;
         return;
     }
 
+    //単位ベクトルの計算
     double n_ab[2] = { vec_ab[0] / d_ab, vec_ab[1] / d_ab };
 
     // exponent をクリップしてオーバーフロー防止
@@ -75,8 +78,26 @@ void calculate_social_force(HumanAgent *self, HumanAgent *other, double force[2]
     double overlap = fmax(0.0, r_ab - d_ab);
     double body_force_mag = self->k * overlap; // k は接触剛性
 
-    force[0] = magnitude * n_ab[0] + body_force_mag * n_ab[0];
-    force[1] = magnitude * n_ab[1] + body_force_mag * n_ab[1];
+    double friction_force[2] = {0.0, 0.0};
+    if (overlap > 0.0) { 
+        // 接線ベクトル t_ab の作成 (n_ab を反時計回りに90度回転: (-ny, nx))
+        double t_ab[2] = { -n_ab[1], n_ab[0] }; 
+
+        // 相対速度の計算 (v_j - v_i)
+        double dvx = other->velocity[0] - self->velocity[0]; 
+        double dvy = other->velocity[1] - self->velocity[1];
+
+        // 接線方向の速度差 (Delta v_ji^t)
+        double tangential_vel_diff = dvx * t_ab[0] + dvy * t_ab[1];
+
+        // 摩擦力の大きさ = kappa * 重なり * 接線速度差
+        double friction_mag = self->kappa * overlap * tangential_vel_diff;
+
+        friction_force[0] = friction_mag * t_ab[0];
+        friction_force[1] = friction_mag * t_ab[1];
+    }
+    force[0] = (magnitude + body_force_mag) * n_ab[0] + friction_force[0]; 
+    force[1] = (magnitude + body_force_mag) * n_ab[1] + friction_force[1];
 }
 
 void calculate_wall_force(HumanAgent *agent, double force[2], double width, double height) {
@@ -86,26 +107,35 @@ void calculate_wall_force(HumanAgent *agent, double force[2], double width, doub
 
     double overlap;
     double repulsive;
+    double friction;
 
     // 左壁 x=0
     overlap = fmax(0.0, agent->radius - agent->pos[0]);
     repulsive = agent->k * exp(overlap / agent->B) + agent->k * overlap;
     force[0] += repulsive;
+    friction = - (agent->kappa * overlap * agent->velocity[1]);
+    force[1] += friction;
 
     // 右壁 x=width
     overlap = fmax(0.0, agent->pos[0] + agent->radius - width);
     repulsive = - (agent->k * exp(overlap / agent->B) + agent->k * overlap);
     force[0] += repulsive;
+    friction = - (agent->kappa * overlap * (-agent->velocity[1]));
+    force[1] -= friction;
 
     // 下壁 y=0
     overlap = fmax(0.0, agent->radius - agent->pos[1]);
     repulsive = agent->k * exp(overlap / agent->B) + agent->k * overlap;
     force[1] += repulsive;
+    friction = - (agent->kappa * overlap * agent->velocity[0]);
+    force[0] += friction;
 
     // 上壁 y=height
     overlap = fmax(0.0, agent->pos[1] + agent->radius - height);
     repulsive = - (agent->k * exp(overlap / agent->B) + agent->k * overlap);
     force[1] += repulsive;
+    friction = - (agent->kappa * overlap * (-agent->velocity[0]));
+    force[0] -= friction;
 }
 
 

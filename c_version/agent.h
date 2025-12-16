@@ -18,6 +18,7 @@ typedef struct HumanAgent {
     double A;
     double B;
     double k;
+    double kappa;
 } HumanAgent;
 
 // 関数宣言

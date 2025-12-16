@@ -31,11 +31,11 @@ void init_model(HumanSimulationModel* model, int num_agents, double width, doubl
     model->num_obstacles = 2;
     model->obstacles = (Obstacle*)malloc(sizeof(Obstacle) * model->num_obstacles);
     //円柱
-    model->obstacles[0] = (Obstacle){OBSTACLE_CIRCLE, {18.2, 0.8}, 0.4514, 0.0, 0.0, {0.0,0.0}, {0.0,0.0}, 0.0};
-    model->obstacles[1] = (Obstacle){OBSTACLE_CIRCLE, {19.8, 0.8}, 0.4514, 0.0, 0.0, {0.0,0.0}, {0.0,0.0}, 0.0};
+    // model->obstacles[0] = (Obstacle){OBSTACLE_CIRCLE, {18.2, 0.8}, 0.4514, 0.0, 0.0, {0.0,0.0}, {0.0,0.0}, 0.0};
+    // model->obstacles[1] = (Obstacle){OBSTACLE_CIRCLE, {19.8, 0.8}, 0.4514, 0.0, 0.0, {0.0,0.0}, {0.0,0.0}, 0.0};
     //四角形
-    // model->obstacles[0] = (Obstacle){OBSTACLE_RECTANGLE,{18.2,0.8},0.0,0.8,0.8,{0.0,0.0},{0.0,0.0},0.0}; 
-    // model->obstacles[1] = (Obstacle){OBSTACLE_RECTANGLE,{19.8,0.8},0.0,0.8,0.8,{0.0,0.0},{0.0,0.0},0.0};
+    model->obstacles[0] = (Obstacle){OBSTACLE_RECTANGLE,{18.2,0.8},0.0,0.8,0.8,{0.0,0.0},{0.0,0.0},0.0}; 
+    model->obstacles[1] = (Obstacle){OBSTACLE_RECTANGLE,{19.8,0.8},0.0,0.8,0.8,{0.0,0.0},{0.0,0.0},0.0};
 
     // エージェント初期化
     for (int i = 0; i < num_agents; i++) {

@@ -42,7 +42,7 @@ int main() {
         }
 
         // デバッグ用: 各ステップの先頭エージェントだけ表示
-        if (step % 10 == 0 || step == SIMULATION_STEPS - 1) {
+        if (step % 100 == 0 || step == SIMULATION_STEPS - 1) {
             printf("=== Step %d ===\n", step);
             for (int i = 0; i < model.num_agents; i++) {
                 printf("Agent %d: x = %.2f, y = %.2f\n",
@@ -66,58 +66,58 @@ int main() {
     free_model(&model);
     printf("save to positions.csv\n");
 
-    // // --- 障害物位置を変えた平均避難時間の出力 (results.csv) ---
-    // int num_positions = 20;
-    // double y_start = 0;
-    // double y_step = 0.1;
-    // double results[num_positions];
+//     // // --- 障害物位置を変えた平均避難時間の出力 (results.csv) ---
+//     int num_positions = 20;
+//     double y_start = 0;
+//     double y_step = 0.1;
+//     double results[num_positions];
 
-    // FILE *fp_res = fopen("./results.csv", "w");
-    // if (!fp_res) {
-    //     perror("Failed to open results.csv");
-    //     return 1;
-    // }
-    // fprintf(fp_res, "y_position,avg_steps\n","trial_steps\n");
+//     FILE *fp_res = fopen("./results.csv", "w");
+//     if (!fp_res) {
+//         perror("Failed to open results.csv");
+//         return 1;
+//     }
+//     fprintf(fp_res, "y_position,avg_steps\n","trial_steps\n");
 
-    // for (int i = 0; i < num_positions; i++) {
-    //     double y = y_start + i * y_step;
-    //     double sum = 0;
-    //     int steps_array[100];
+//     for (int i = 0; i < num_positions; i++) {
+//         double y = y_start + i * y_step;
+//         double sum = 0;
+//         int steps_array[100];
 
 
-    //     for (int trial = 0; trial < 100; trial++) {
-    //         init_model(&model, NUM_AGENTS, WIDTH, HEIGHT);
+//         for (int trial = 0; trial < 100; trial++) {
+//             init_model(&model, NUM_AGENTS, WIDTH, HEIGHT);
 
-    //         // 四角柱
-    //         // model.obstacles[0] = (Obstacle){OBSTACLE_RECTANGLE,{18.2,y},0.0,0.8,0.8,{0.0,0.0},{0.0,0.0},0.0}; 
-    //         // model.obstacles[1] = (Obstacle){OBSTACLE_RECTANGLE,{19.8,y},0.0,0.8,0.8,{0.0,0.0},{0.0,0.0},0.0};
-    //         //円柱
-    //         model.obstacles[0] = (Obstacle){OBSTACLE_CIRCLE, {18.2, y}, 0.4514,
-    //                                         0.0, 0.0, {0.0,0.0}, {0.0,0.0}, 0.0};
-    //         model.obstacles[1] = (Obstacle){OBSTACLE_CIRCLE, {19.8, y}, 0.4514,
-    //                                         0.0, 0.0, {0.0,0.0}, {0.0,0.0}, 0.0};
+//             // 四角柱
+//             model.obstacles[0] = (Obstacle){OBSTACLE_RECTANGLE,{18.2,y},0.0,0.8,0.8,{0.0,0.0},{0.0,0.0},0.0}; 
+//             model.obstacles[1] = (Obstacle){OBSTACLE_RECTANGLE,{19.8,y},0.0,0.8,0.8,{0.0,0.0},{0.0,0.0},0.0};
+//             //円柱
+//             // model.obstacles[0] = (Obstacle){OBSTACLE_CIRCLE, {18.2, y}, 0.4514,
+//             //                                 0.0, 0.0, {0.0,0.0}, {0.0,0.0}, 0.0};
+//             // model.obstacles[1] = (Obstacle){OBSTACLE_CIRCLE, {19.8, y}, 0.4514,
+//             //                                 0.0, 0.0, {0.0,0.0}, {0.0,0.0}, 0.0};
 
-    //         int steps = run_simulation(&model);
-    //         sum += steps;
-    //         steps_array[trial] = steps;   // 記録
+//             int steps = run_simulation(&model);
+//             sum += steps;
+//             steps_array[trial] = steps;   // 記録
 
-    //         free_model(&model);
-    //     }
+//             free_model(&model);
+//         }
 
-    //     results[i] = sum / 100.0;
-    //     fprintf(fp_res, "%f,%f\n", y, results[i]);
-    //     for (int trial = 0; trial < 100; trial++) {
-    //         fprintf(fp_res, ",%d", steps_array[trial]);
-    // }
-    // fprintf(fp_res, "\n");
+//         results[i] = sum / 100.0;
+//         fprintf(fp_res, "%f,%f\n", y, results[i]);
+//         for (int trial = 0; trial < 100; trial++) {
+//             fprintf(fp_res, ",%d", steps_array[trial]);
+//     }
+//     fprintf(fp_res, "\n");
 
-    // }
+//     }
 
-   //fclose(fp_res);
-    //printf("save to results.csv\n");
+//    fclose(fp_res);
+//     printf("save to results.csv\n");
 
-    return 0;
-}
+     return 0;
+ }
 
-// gcc main.c model.c agent.c obstacle.c -o sim.exe -lm
-// ./sim.exe
+// // gcc main.c model.c agent.c obstacle.c -o sim.exe -lm
+// // ./sim.exe
