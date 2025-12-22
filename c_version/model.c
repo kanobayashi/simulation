@@ -31,11 +31,11 @@ void init_model(HumanSimulationModel* model, int num_agents, double width, doubl
     model->num_obstacles = 2;
     model->obstacles = (Obstacle*)malloc(sizeof(Obstacle) * model->num_obstacles);
     //円柱
-    // model->obstacles[0] = (Obstacle){OBSTACLE_CIRCLE, {18.2, 0.8}, 0.4514, 0.0, 0.0, {0.0,0.0}, {0.0,0.0}, 0.0};
-    // model->obstacles[1] = (Obstacle){OBSTACLE_CIRCLE, {19.8, 0.8}, 0.4514, 0.0, 0.0, {0.0,0.0}, {0.0,0.0}, 0.0};
+    // model->obstacles[0] = (Obstacle){OBSTACLE_CIRCLE, {18.1, 0.8}, 0.4514, 0.0, 0.0, {0.0,0.0}, {0.0,0.0}, 0.0};
+    // model->obstacles[1] = (Obstacle){OBSTACLE_CIRCLE, {19.9, 0.8}, 0.4514, 0.0, 0.0, {0.0,0.0}, {0.0,0.0}, 0.0};
     //四角形
-    model->obstacles[0] = (Obstacle){OBSTACLE_RECTANGLE,{18.2,0.8},0.0,0.8,0.8,{0.0,0.0},{0.0,0.0},0.0}; 
-    model->obstacles[1] = (Obstacle){OBSTACLE_RECTANGLE,{19.8,0.8},0.0,0.8,0.8,{0.0,0.0},{0.0,0.0},0.0};
+    model->obstacles[0] = (Obstacle){OBSTACLE_RECTANGLE,{18.1,0.8},0.0,0.9,0.9,{0.0,0.0},{0.0,0.0},0.0}; 
+    model->obstacles[1] = (Obstacle){OBSTACLE_RECTANGLE,{19.9,0.8},0.0,0.9,0.9,{0.0,0.0},{0.0,0.0},0.0};
 
     // エージェント初期化
     for (int i = 0; i < num_agents; i++) {
@@ -61,15 +61,24 @@ void step_model(HumanSimulationModel* model) {
 
         // 出口到達判定
         for (int e = 0; e < model->num_exits; e++) {
-            double dx = fabs(agent->pos[0] - model->exits[e].pos[0]);
-            double dy = fabs(agent->pos[1] - model->exits[e].pos[1]);
-            // 矩形の半幅・半高さにエージェント半径を加えて判定
-            if (dx < model->exits[e].width / 2.0 + agent->radius &&
-                dy < model->exits[e].height / 2.0 + agent->radius) {
-                    remove_agent(model, agent->id);  // エージェントを退場させる
-                    break; 
-    }
-}
+            Exit *ex = &model->exits[e];
+            
+            // 出口の左右端の座標
+            double exit_left  = ex->pos[0] - ex->width / 2.0;
+            double exit_right = ex->pos[0] + ex->width / 2.0;
+
+            // フィードバックに基づいた条件：
+            // 1. x が出口範囲内（左端+radius 〜 右端-radius）にある
+            // 2. y=0 の線を越えた（中心が y <= 0 になった）
+            if (agent->pos[0] >= (exit_left + agent->radius) &&
+                agent->pos[0] <= (exit_right - agent->radius)) {
+                
+                if (agent->pos[1] <= 0.0) {
+                    remove_agent(model, agent->id);
+                    break; // このエージェントは消滅したので次のエージェントへ
+                }
+            }
+        }
     }
 }
 

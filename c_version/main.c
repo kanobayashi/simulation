@@ -89,12 +89,12 @@ int main() {
 //             init_model(&model, NUM_AGENTS, WIDTH, HEIGHT);
 
 //             // 四角柱
-//             model.obstacles[0] = (Obstacle){OBSTACLE_RECTANGLE,{18.2,y},0.0,0.8,0.8,{0.0,0.0},{0.0,0.0},0.0}; 
-//             model.obstacles[1] = (Obstacle){OBSTACLE_RECTANGLE,{19.8,y},0.0,0.8,0.8,{0.0,0.0},{0.0,0.0},0.0};
+//             model.obstacles[0] = (Obstacle){OBSTACLE_RECTANGLE,{18.1,y},0.0,0.9,0.9,{0.0,0.0},{0.0,0.0},0.0}; 
+//             model.obstacles[1] = (Obstacle){OBSTACLE_RECTANGLE,{19.9,y},0.0,0.9,0.9,{0.0,0.0},{0.0,0.0},0.0};
 //             //円柱
-//             // model.obstacles[0] = (Obstacle){OBSTACLE_CIRCLE, {18.2, y}, 0.4514,
+//             // model.obstacles[0] = (Obstacle){OBSTACLE_CIRCLE, {18.1, y}, 0.51,
 //             //                                 0.0, 0.0, {0.0,0.0}, {0.0,0.0}, 0.0};
-//             // model.obstacles[1] = (Obstacle){OBSTACLE_CIRCLE, {19.8, y}, 0.4514,
+//             // model.obstacles[1] = (Obstacle){OBSTACLE_CIRCLE, {19.9, y}, 0.51,
 //             //                                 0.0, 0.0, {0.0,0.0}, {0.0,0.0}, 0.0};
 
 //             int steps = run_simulation(&model);

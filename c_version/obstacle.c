@@ -20,7 +20,7 @@ static void calc_circle_force(HumanAgent *agent, Obstacle *obs, double force[2])
         double ny = dy / distance;
 
         // 1. 心理的斥力の計算 (A * exp) 
-        // 論文設定値 A=2000, B=0.08 を想定 [cite: 462]
+        // 論文設定値 A=2000, B=0.08 を想定
         double social_mag = agent->A * exp((agent->radius - distance) / agent->B);
 
         // 2. 物理的な力の計算 (接触時 overlap > 0 のみ) 
